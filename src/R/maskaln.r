@@ -11,7 +11,7 @@ suppressPackageStartupMessages(library(Biostrings))
 suppressPackageStartupMessages(library(dplyr))
 suppressPackageStartupMessages(library(stringr))
 
-SCRIPT_VERSION = "0.8"
+SCRIPT_VERSION = "0.8.1"
 
 # Arguments for testing:
 # opt = list(options = list(min_blockwidth = 1, min_gap_fraction = 0.9, max_prop_gaps = 0.5), args = c('maskaln.00.alnfaa', 'maskaln.00.out'))
@@ -23,7 +23,7 @@ option_list = list(
   ),
   make_option(
     '--min_gap_fraction', type = 'double', default = 0.9, 
-    help = 'Minimum fraction of gaps in a column to mask the position, default: %default.'
+    help = 'Minimum proportion of gaps in a column to mask the position, default: %default.'
   ),
   make_option(
     '--max_prop_gaps', type = 'double', default = 0.5, 
@@ -73,10 +73,14 @@ st <- data.frame(seqname = rownames(seqs), seq = as.character(seqs), stringsAsFa
   tibble::column_to_rownames('seqname') %>%
   as.matrix()
 
-ss <- as(st, 'AAStringSet')
-names(ss) <- rownames(st)
+if ( dim(st)[1] > 0 ) {
+  ss <- as(st, 'AAStringSet')
+  names(ss) <- rownames(st)
 
-logmsg(sprintf("Writing %d sequences of %d length to %s", nrow(st), str_length(st[1,1]), opt$args[2]))
-writeXStringSet(ss, opt$args[2])
+  logmsg(sprintf("Writing %d sequences of %d length to %s", nrow(st), str_length(st[1,1]), opt$args[2]))
+  writeXStringSet(ss, opt$args[2])
+} else {
+  write("Nothing left after masking", stderr())
+}
 
 logmsg("Done")
