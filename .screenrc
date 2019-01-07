@@ -1,6 +1,10 @@
 sessionname maskaln
 setenv ROOT $PWD
 # __INSERTPOINT__ This line allows a script to insert new configuration lines here.
+chdir $ROOT/src/R
+screen -t R
+chdir $ROOT/src/R-test
+screen -t R-test
 chdir $ROOT
 screen -t rstudio
 screen -t man
