@@ -7,11 +7,15 @@ all: maskaln
 clean:
 	rm -f *.out
 
-maskaln: maskaln.00 maskaln.01
+maskaln: maskaln.00 maskaln.01 maskaln.02
 
 maskaln.00:
-	../R/maskaln.r --verbose $@.alnfaa $@.out
+	../R/maskaln.r $@.alnfaa $@.out
 	@$(CHECK)
 
 maskaln.01:
 	../R/maskaln.r --verbose $@.alnfaa $@.out
+
+maskaln.02:
+	../R/maskaln.r --protect_taxa=$@.protect $@.alnfaa $@.out
+	@$(CHECK)

@@ -10,13 +10,18 @@ suppressPackageStartupMessages(library(optparse))
 suppressPackageStartupMessages(library(Biostrings))
 suppressPackageStartupMessages(library(dplyr))
 suppressPackageStartupMessages(library(stringr))
+suppressPackageStartupMessages(library(readr))
 
-SCRIPT_VERSION = "0.8.1"
+SCRIPT_VERSION = "0.9"
 
 # Arguments for testing:
 # opt = list(options = list(min_blockwidth = 1, min_gap_fraction = 0.9, max_prop_gaps = 0.5), args = c('maskaln.00.alnfaa', 'maskaln.00.out'))
 # Get arguments
 option_list = list(
+  make_option(
+    '--max_prop_gaps', type = 'double', default = 0.5, 
+    help = 'Maximum proportion of gap characters in a sequence to delete it, default: %default.'
+  ),
   make_option(
     '--min_blockwidth', type = 'integer', default = 1,
     help = 'Minimum widht of a block gaps in a column to mask the position, default: %default.'
@@ -26,8 +31,8 @@ option_list = list(
     help = 'Minimum proportion of gaps in a column to mask the position, default: %default.'
   ),
   make_option(
-    '--max_prop_gaps', type = 'double', default = 0.5, 
-    help = 'Maximum proportion of gap characters in a sequence to delete it, default: %default.'
+    '--protect_taxa', type = 'character', default = '',
+    help = 'Name of file containing taxa to protect, i.e. not filter out. One taxon per line.'
   ),
   make_option(
     c("-v", "--verbose"), action="store_true", default=FALSE, 
@@ -60,6 +65,12 @@ logmsg = function(msg, llevel='INFO') {
   }
 }
 
+if ( opt$options$protect_taxa != '' ) {
+  protect <- read_tsv(opt$options$protect_taxa, col_names = c('taxon'), col_types = cols(taxon = col_character()))
+} else {
+  protect <- tibble(taxon = character())
+}
+
 logmsg(sprintf("Reading alignment in %s", opt$args[1]))
 seqs <- readAAMultipleAlignment(opt$args[1]) %>%
   maskGaps(
@@ -69,7 +80,10 @@ seqs <- readAAMultipleAlignment(opt$args[1]) %>%
 
 # Mask rows of the alignment with mostly gaps, i.e. allow only sequences with at most 20% gaps.
 st <- data.frame(seqname = rownames(seqs), seq = as.character(seqs), stringsAsFactors = FALSE) %>%
-  filter(str_count(seq, fixed('-'))/str_length(seq) < opt$options$max_prop_gaps) %>%
+  filter(
+    seqname %in% protect |
+    str_count(seq, fixed('-'))/str_length(seq) < opt$options$max_prop_gaps
+  ) %>%
   tibble::column_to_rownames('seqname') %>%
   as.matrix()
 
