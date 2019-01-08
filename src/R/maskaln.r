@@ -12,7 +12,7 @@ suppressPackageStartupMessages(library(dplyr))
 suppressPackageStartupMessages(library(stringr))
 suppressPackageStartupMessages(library(readr))
 
-SCRIPT_VERSION = "0.9.1"
+SCRIPT_VERSION = "0.9.2"
 
 # Arguments for testing:
 # opt = list(options = list(min_blockwidth = 1, min_gap_fraction = 0.9, max_prop_gaps = 0.5), args = c('maskaln.00.alnfaa', 'maskaln.00.out'))
@@ -20,7 +20,7 @@ SCRIPT_VERSION = "0.9.1"
 option_list = list(
   make_option(
     '--max_prop_gaps', type = 'double', default = 0.5, 
-    help = 'Maximum proportion of gap characters in a sequence to delete it, default: %default.'
+    help = 'Maximum proportion of gap characters in a sequence to delete it, default: %default. The lower, the stricter.'
   ),
   make_option(
     '--min_blockwidth', type = 'integer', default = 1,
@@ -28,7 +28,7 @@ option_list = list(
   ),
   make_option(
     '--min_gap_fraction', type = 'double', default = 0.9, 
-    help = 'Minimum proportion of gaps in a column to mask the position, default: %default.'
+    help = 'Minimum proportion of gaps in a column to mask the position, default: %default. Set to 1.0 to not mask anything.'
   ),
   make_option(
     '--protect_taxa', type = 'character', default = '',
